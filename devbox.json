@@ -1,0 +1,27 @@
+{
+  "packages": {
+    "python": "3.12",
+    "zlib": "latest",
+    "curl": {
+      "version": "latest",
+      "outputs": [
+        "out",
+        "bin"
+      ]
+    }
+  },
+  "env": {
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "LD_LIBRARY_PATH": "$DEVBOX_PACKAGES_DIR/lib:$LD_LIBRARY_PATH"
+  },
+  "shell": {
+    "init_hook": [
+      ". $VENV_DIR/bin/activate",
+      "pip install -q pandas numpy==1.26.4 seaborn matplotlib scikit-learn scipy nltk 'portalocker>=2.0.0' plotly tqdm ipython",
+      "pip install -q torch==2.3.0+cpu torchvision==0.18.0+cpu torchtext==0.18.0+cpu torchdata==0.9.0 --extra-index-url https://download.pytorch.org/whl/cpu"
+    ],
+    "scripts": {
+      "run_test": "python main.py"
+    }
+  }
+}
