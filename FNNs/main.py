@@ -33,7 +33,7 @@ warnings.filterwarnings('ignore')
 tokens = preprocess(song)  # Preprocess the text in 'song'
 
 # Tokenization part
-vocab = tokenizetext(tokens)
+vocab = tokenizetext(song)
 print("vocabs :", vocab)
 print('vocab indices',vocab(tokens[0:10]))
 
@@ -45,7 +45,7 @@ print(f"text_pipeline sample output: {text_pipeline(song)[0:10]}")
 index_to_token = vocab.get_itos()
 print(f"index_to_token: {index_to_token[58]}")
 
-# sys.exit(0)
+sys.exit(0)
 
 #Embeddings layers
 
