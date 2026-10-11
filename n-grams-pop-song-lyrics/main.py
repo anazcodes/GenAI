@@ -109,13 +109,13 @@ print(f"first 10 tokens:  {tokens[0:10]}")
 vocabulary = set(tokens)
 # create a frequency distribution of words
 fdist = nltk.FreqDist(tokens)
-print(f"Frequency distribution of word 'you': {fdist["you"]}")
+print(f"Frequency distribution of word 'you': {fdist['you']}")
 
 plt.bar(list(fdist.keys())[0:10], list(fdist.values())[0:10])
 plt.xlabel("Words")
 plt.ylabel("Frequency")
-plt.show()
 plt.savefig('./pop-song-lyrics/word-freq')
+plt.show()
 
 bigrams = nltk.bigrams(tokens)
 print(f"bigrams iterator: {bigrams}")
@@ -126,7 +126,7 @@ my_bigrams = list(nltk.bigrams(tokens))
 print(f"sample bigrams: {my_bigrams}")
 
 freq_bigrams = nltk.FreqDist(nltk.bigrams(tokens))
-print(f"freq_bigrams: {freq_bigrams[("gon", "na")]}")
+print(f"freq_bigrams: {freq_bigrams[('gon', 'na')]}")
 
 for mb in my_bigrams[0:10]:
     print(f"biagram: {mb} freq:{freq_bigrams[mb]}")
@@ -147,7 +147,7 @@ def make_predictions(my_words, freq_grams, normalize = 1, vocabulary= vocabulary
     Args:
         my_words (list): A list of words in the input sequence.
         freq_grams (dict): A dictionary containing frequency of n-grams.
-        normlize (int): A normalization factor for calculating probabilities.
+        normalize (int): Count of the context alone, used as the denominator for P(next word | context).
         vocabulary (list): A list of words in the vocabulary.
 
     Returns:
@@ -157,25 +157,19 @@ def make_predictions(my_words, freq_grams, normalize = 1, vocabulary= vocabulary
 
     vocab_probabilities = {}  # Initialize a dictionary to store predicted word probabilities
     context_size = len(list(freq_grams.keys())[0]) # Determine the context size from n-grams keys
-    print(f"context size: {context_size-1}")
-    # Preprocess input words and take only the relevant context words
-    my_tokens = preprocess(my_words)[0:context_size-1]
+    # Preprocess input words and keep only the last (n-1) words as context
+    my_tokens = preprocess(my_words)[-(context_size-1):]
 
     # Calculate probabilities for each word in the vocabulary given the context
     for nw in vocabulary:
         temp = my_tokens.copy()
         temp.append(nw) # Add the next word to the context
 
-        print(f"Temp: {temp} Normalize: {normalize}")
-
         # Calculate the conditional probability using the frequency information
         if normalize != 0:
             vocab_probabilities[nw] = freq_grams[tuple(temp)]/ normalize
         else:
             vocab_probabilities[nw] = freq_grams[tuple(temp)]
-
-
-        print(f"Frequency: {freq_grams[tuple(temp)]}")
 
     # Sort the predicted words based on their probabilities in descending order
     vocab_probabilities = sorted(vocab_probabilities.items(), key = lambda x:x[1], reverse=True)
@@ -187,15 +181,8 @@ my_words = "are"
 vocab_probabilities = make_predictions(my_words, freq_bigrams, normalize=fdist["are"])
 # print(f"vocab probabilities: {vocab_probabilities[0:10]}")
 
-my_song =""
-for w in tokens[0:100]:
-    my_word = make_predictions(w, freq_bigrams)[0][0]
-    my_song += " " + my_word
-
-
-
-
 my_song = "i"
+my_word = "i"
 
 for i in range (100):
     my_word = make_predictions(my_word, freq_bigrams)[0][0]
@@ -209,13 +196,13 @@ print(f"\n\nBigram Lyrics (context size = 1):\n\n{my_song}\n")
 freq_trigrams = nltk.FreqDist(nltk.trigrams(tokens))
 # print(f"freq_trigrams: {freq_trigrams}")
 
-make_predictions ("so do", freq_trigrams, normalize=freq_bigrams[("do", "i")])[0:10]
+make_predictions ("so do", freq_trigrams, normalize=freq_bigrams[("so", "do")])[0:10]
 
 
 my_song = ""
 
 w1 = tokens[0]
-for w2 in tokens[0:100]:
+for w2 in tokens[1:101]:
     gram= w1 +' '+w2
     my_word = make_predictions(gram, freq_trigrams)[0][0]
     my_song += " "+ my_word
