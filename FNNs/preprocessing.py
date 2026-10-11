@@ -77,30 +77,32 @@ def preprocess(words):
     return [w.lower() for w in tokens if len(w) != 0 and w not in string.punctuation]
 
 
-def tokenizetext(song):
+def tokenizetext(tokens):
     """
-    Tokenizes the input text (song) and builds a vocabulary from the tokens.
+    Builds a vocabulary from an already-tokenized list of words.
+
+    Building the vocabulary from this same `tokens` list (rather than
+    re-tokenizing the raw song text with a different tokenizer) guarantees
+    every word used elsewhere in the pipeline is actually present in the
+    vocabulary, instead of silently falling back to "<unk>" whenever the
+    two tokenizers disagree on word boundaries.
 
     Steps:
-    1. Tokenization: The function splits the input text into words and applies
-       a tokenizer function to each word.
-    2. Vocabulary Building: Constructs a vocabulary from the tokenized words,
+    1. Vocabulary Building: Constructs a vocabulary from the tokens,
        including a special "<unk>" token to handle out-of-vocabulary words.
-    3. Default Indexing: Sets the default index for unknown words, ensuring
+    2. Default Indexing: Sets the default index for unknown words, ensuring
        that any unseen tokens are mapped to "<unk>".
 
     Parameters:
-    song (str): The input text (song lyrics) to be tokenized and processed.
+    tokens (list): The preprocessed word tokens (e.g. from `preprocess()`).
 
     Returns:
     vocab (Vocab): A vocabulary object mapping tokens to their corresponding indices.
     """
 
-    # Tokenize the text
-    # Split the input text into words and apply the tokenizer function to each word.
-    # The 'map' function ensures that each word is tokenized properly.
-
-    tokenized_song = map(tokenizer, song.split())
+    # Wrap each token as its own single-token "sentence", since
+    # build_vocab_from_iterator expects an iterable of token lists.
+    tokenized_song = ([token] for token in tokens)
 
     # Build vocabulary from tokenized text
     # The function 'build_vocab_from_iterator' constructs a vocabulary by iterating

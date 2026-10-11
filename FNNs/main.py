@@ -33,7 +33,7 @@ warnings.filterwarnings('ignore')
 tokens = preprocess(song)  # Preprocess the text in 'song'
 
 # Tokenization part
-vocab = tokenizetext(song)
+vocab = tokenizetext(tokens)
 print("vocabs :", vocab)
 print('vocab indices',vocab(tokens[0:10]))
 
