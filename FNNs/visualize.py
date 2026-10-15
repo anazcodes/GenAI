@@ -18,14 +18,13 @@ def plot_tsne_embeddings(model, index_to_token, save_path, num_labeled=20):
     tsne = TSNE(n_components=2, random_state=42)
     X_2d = tsne.fit_transform(X)
 
-    plt.figure()
+    plt.figure(figsize=(10, 8))
     labels = []
 
     for j in range(len(X_2d)):
         if j < num_labeled:
             plt.scatter(X_2d[j, 0], X_2d[j, 1], label=index_to_token[j])
             labels.append(index_to_token[j])
-            # Add words as annotations
             plt.annotate(
                 index_to_token[j],
                 (X_2d[j, 0], X_2d[j, 1]),
@@ -37,7 +36,7 @@ def plot_tsne_embeddings(model, index_to_token, save_path, num_labeled=20):
             plt.scatter(X_2d[j, 0], X_2d[j, 1])
 
     plt.legend(labels, loc="upper left", bbox_to_anchor=(1, 1))
-    plt.savefig(save_path)
+    plt.savefig(save_path, bbox_inches="tight")
     plt.show()
     plt.close()
 

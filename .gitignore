@@ -1,3 +1,5 @@
 .devbox
 .venv
+__pycache__/
+*.pyc
 devbox.lock

@@ -1,3 +1,4 @@
+import sys
 from tqdm import tqdm
 
 from generate import pickrandomline, write_song
@@ -23,9 +24,11 @@ def train(dataloader, model, song, optimizer, criterion, vocab, tokens, context_
         list: List containing loss values for each epoch.
     """
 
+
     MY_LOSS = [] # List to store loss values for each epoch
 
-    # terate over the specified number of epochs
+
+    # iterate over the specified number of epochs
     for epoch in tqdm(range(number_of_epochs)):
         total_loss = 0 # Initialize total loss for the current epoch
         my_song ="" # Intialize a string to store the generated song
@@ -34,8 +37,12 @@ def train(dataloader, model, song, optimizer, criterion, vocab, tokens, context_
         for context, target in dataloader:
             model.zero_grad() # Sero the gradients to avoid accumulation
             predicted = model(context) # Forward pass through the model to get predictions
+           
             loss = criterion(predicted, target.reshape(-1)) # Calculate the loss
             total_loss += loss.item() # Accumulate the loss
+
+            # print(f"context: {context} predicted: {predicted} target:{target} target.reshape: {target.reshape(-1)} loss: {loss}")
+            # sys.exit(0)           
 
             loss.backward() # Backpropagation to compute gradients
             optimizer.step() # Update model parameters using the optimizer

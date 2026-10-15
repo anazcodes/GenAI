@@ -17,7 +17,7 @@ import torch.nn as nn
 import torch.optim as optim
 import time
 
-from preprocessing import preprocess, tokenizetext, genngrams, make_collate_fn, tokenizer
+from preprocessing import preprocess, tokenizetext, genngrams, make_collate_fn
 from model import NGramLanguageModeler, genembedding
 from generate import write_song, pickrandomline
 from train import train
@@ -30,24 +30,24 @@ import warnings
 warnings.warn = warn
 warnings.filterwarnings('ignore')
 
+# ----- Data Preparation -----
 tokens = preprocess(song)  # Preprocess the text in 'song'
 
-# Tokenization part
+# ----- Tokenization -----
 vocab = tokenizetext(tokens)
 print("vocabs :", vocab)
 print('vocab indices',vocab(tokens[0:10]))
 
 print("tokens:", tokens[0:10])
 
-text_pipeline = lambda x : vocab(tokenizer(x))
+text_pipeline = lambda x : vocab(preprocess(x))
 print(f"text_pipeline sample output: {text_pipeline(song)[0:10]}")
 
 index_to_token = vocab.get_itos()
 print(f"index_to_token: {index_to_token[58]}")
 
-sys.exit(0)
 
-#Embeddings layers
+# ----- Embeddings -----
 
 embeddings = genembedding(vocab)
 for n in range(2):
@@ -57,6 +57,7 @@ for n in range(2):
     print("embedding ", embedding)
     print("embedding shape ", embedding.shape)
 
+# ----- N-grams -----
 # Generating context-target pairs (n-grams)
 
 # Define the context size for generating n-grams
@@ -67,9 +68,12 @@ context, target = ngrams[0]
 print("context ", context, "target ", target)
 print("context index ", vocab(context), "target index", vocab([target]))
 
+
+
 embedding_dim = 20
 linear = nn.Linear(embedding_dim * CONTEXT_SIZE, 128)
 my_embeddings = embeddings(torch.tensor(vocab(context)))
+print(f"torch.tensor(vocab(context)): {torch.tensor(vocab(context))} vocab(context): {vocab(context)}")
 print("my_embedding.shape ", my_embeddings.shape)
 
 
@@ -82,11 +86,15 @@ print("linear(my_embeddings) \n", linear(my_embeddings))
 
 
 
+# ----- Batching -----
 # Batch function
 
 
 # Set the device to GPU if available; otherwise, use CPU
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("xpu" if torch.cuda.is_available() else "cpu")
+
+
+print(f"device:{device}")
 
 # Define hyperparameters
 CONTEXT_SIZE = 3 # Number of previous words used as context for prediction
@@ -106,6 +114,7 @@ dataloader = DataLoader(
     )
 
 
+# ----- Model Definition (untrained demo) -----
 model = NGramLanguageModeler(len(vocab), EMBEDDING_DIM, CONTEXT_SIZE).to(device)
 
 context , target = next(iter(dataloader))
@@ -119,6 +128,7 @@ print(f"predicted index: {predicted_index}")
 print(f"predicted tokens {[index_to_token[i.item()]  for i in predicted_index]}")
 
 
+# ----- Generation (untrained) -----
 # Example usage:
 selected_line = pickrandomline(song) # Pick a random line from the song
 
@@ -130,7 +140,7 @@ print(generated_song)
 
 
 
-# Training
+# ----- Training -----
 criterion = torch.nn.CrossEntropyLoss()
 
 print("numpy version:", np.__version__)
@@ -165,7 +175,9 @@ for context_size, fig_path in zip([2, 4, 8], tsne_fig_paths):
 
     plot_tsne_embeddings(model, index_to_token, fig_path)
 
-
+print(f"my_loss_list: {my_loss_list}")
+sys.exit(1)
+# ----- Evaluation / Visualization -----
 plot_metric_comparison(my_loss_list, model_names, "Cross-entropy Loss", "FNNs/fig4")
 
 

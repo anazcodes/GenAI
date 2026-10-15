@@ -1,3 +1,4 @@
+import sys
 import re
 import string
 
@@ -11,7 +12,6 @@ from torchtext.vocab import build_vocab_from_iterator
 from nltk.tokenize import word_tokenize
 
 
-tokenizer = get_tokenizer("basic_english")
 
 
 def preprocess_string(s):
@@ -136,20 +136,15 @@ def genngrams(tokens, context_size):
           Each tuple contains (context_words, target_word).
     """
 
-    # Generate n-grams
-    # Iterate through the tokens starting from index context_size to the end
-    # For each token at position 'i', extract thee previous context_size words as context
-    ngrams = [
-        (
-            [tokens[i-j-1] for j in range (context_size)], # Context words (previous words)
-            tokens[i] # Target word (the word to predict)
-
-
-        )
-
-        for i in range (context_size, len(tokens))
-    ]
-
+    ngrams = []
+    for i in range(context_size, len(tokens)):
+        context = tokens[i - context_size : i]   # the words right before position i, in order
+        target = tokens[i]
+        ngrams.append((context, target))
+        print(f"i-context_size: {i-context_size} context_size: {context_size} i: {i}\ncontext: {context} target: {target}\n")
+        # if i == 6:
+        #     print(f"N-grams: {ngrams}")
+        #     sys.exit(1)
     return ngrams
 
 
